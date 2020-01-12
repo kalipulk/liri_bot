@@ -3,7 +3,27 @@
 require("dotenv").config();
 
 var axios = require("axios");
+moment().format();
+var fs = require("fs");
 
+var totalInput = process.argv;
+var userInput = process.argv[2];
+var userData = totalInput.slice(3).join(" ");
+
+switch (userInput) {
+    case "concert-this":
+        concertThis(userData);
+        break;
+    case "spotify-this-song":
+        spotifyThis(userData);
+        break;
+    case "movie-this": 
+        movieThis(userData);   
+        break;
+    case "do-what-it-says":
+        doWhatItSays(userData);
+        break;
+};     
 
 //   SPOTIFY
 function searchSpotify() {
@@ -26,7 +46,7 @@ console.log(data.tracks.items[0].album.name);
 });
 
 }
-// searchSpotify();
+searchSpotify();
 
 
 //OMDb 
@@ -45,18 +65,28 @@ console.log(data.data.Actors);
 })
 }
 
-// searchOMDb();
+searchOMDb();
 
 //Bands in Town 
 
-function searchBands() {
-   var bands = "https://rest.bandsintown.com/artists/" + process.argv[3] + "/events?app_id=codingbootcamp"
-   axios.get(APIurl).then(function(data){
-    console.log(data.artist.name);
-    console.log(data.venue.city);
-    console.log(data.venue.country);
-    console.log(data.datetime);
+function searchBands(userData) {
+   if (!userData) {
+        userData = "Maggie Rogers";
+   } 
+   axios.get("https://rest.bandsintown.com/artists/" + userData + "/events?app_id=codingbootcamp")
+   .then(function(data){
+        console.log(userData + " next 3 concert dates");
+        for (i = 0; i < 3; i++); {
+            console.log(data[i].venue.name);
+            console.log(data[i].venue.city);
+            var showTime = data[i].datetime;
+            showTime = moment(showTime).format("MMM Do YYYY");
+            console.log(showTime);  
+        }  
 })
+    .catch(function(err) {
+        console.log(err);
+    });
 } 
 
 searchBands();
