@@ -1,8 +1,8 @@
 
-//reading any environment variables with dotenv package
 require("dotenv").config();
 
 var axios = require("axios");
+var moment = require("moment");
 moment().format();
 var fs = require("fs");
 
@@ -10,6 +10,7 @@ var totalInput = process.argv;
 var userInput = process.argv[2];
 var userData = totalInput.slice(3).join(" ");
 
+function playMaker() {
 switch (userInput) {
     case "concert-this":
         concertThis(userData);
@@ -23,10 +24,12 @@ switch (userInput) {
     case "do-what-it-says":
         doWhatItSays(userData);
         break;
-};     
+};  
+}   
+playMaker();
 
 //   SPOTIFY
-function searchSpotify() {
+function spotifyThis() {
     
 var Spotify = require('node-spotify-api');
  
@@ -35,7 +38,7 @@ var spotify = new Spotify({
   secret: "866dc5ea3f6c4184880acebf3ba5757e"
 });
  
-spotify.search({ type: 'track', query: process.argv[3] }, function(err, data) {
+spotify.search({ type: 'track', query: userData }, function(err, data) {
   if (err) {
     return console.log('Error occurred: ' + err);
   }
@@ -46,18 +49,16 @@ console.log(data.tracks.items[0].album.name);
 });
 
 }
-searchSpotify();
-
 
 //OMDb 
 
-function searchOMDb() {
+function movieThis() {
 var APIurl = "http://www.omdbapi.com/?t=" + process.argv[3] + "&apikey=trilogy";
 axios.get(APIurl).then(function(data){
 console.log(data.data.Title);
 console.log(data.data.Year);
 console.log(data.data.imdbRating);
-console.log(data.data.Ratings[1].Value);
+console.log(data.data.Ratings);
 console.log(data.data.Country);
 console.log(data.data.Language);
 console.log(data.data.Plot);
@@ -65,23 +66,23 @@ console.log(data.data.Actors);
 })
 }
 
-searchOMDb();
-
 //Bands in Town 
 
-function searchBands(userData) {
+function concertThis(userData) {
    if (!userData) {
         userData = "Maggie Rogers";
    } 
    axios.get("https://rest.bandsintown.com/artists/" + userData + "/events?app_id=codingbootcamp")
    .then(function(data){
         console.log(userData + " next 3 concert dates");
-        for (i = 0; i < 3; i++); {
-            console.log(data[i].venue.name);
-            console.log(data[i].venue.city);
-            var showTime = data[i].datetime;
+        for (var i = 0; i < 3; i++) {
+            console.log(data.data[i].venue.name);
+            console.log(data.data[i].venue.city);
+            var showTime = data.data[i].datetime;
             showTime = moment(showTime).format("MMM Do YYYY");
             console.log(showTime);  
+            console.log("----------------------");  
+
         }  
 })
     .catch(function(err) {
@@ -89,4 +90,11 @@ function searchBands(userData) {
     });
 } 
 
-searchBands();
+function doWhatItSays() {
+    fs.readFile("read.txt", "utf8", function(err, data){
+        // console.log(data.split(","));
+        userInput = data.split(",")[0];
+        userData = data.split(",")[1];
+        playMaker();
+    })
+}
